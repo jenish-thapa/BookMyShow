@@ -4,9 +4,13 @@ const User = require("../models/userModel");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  // const {name, email, password, }
-  await User.create(req.body);
-  return res.redirect("/");
+  try {
+    const newUser = new User(req.body);
+    await newUser.save();
+    res.status(201).json("User created");
+  } catch (error) {
+    res.json(error);
+  }
 });
 
 router.post("/login", async (req, res) => {});

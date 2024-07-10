@@ -2,14 +2,28 @@ import React, { useEffect } from "react";
 import { Form, Input, Button, Radio, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 
-
 function Register() {
   const onFinish = async (values) => {
     console.log(values);
-   
+    try {
+      const response = await fetch("http://localhost:8081/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Success:", data);
+      } else {
+        console.error("Error:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
-
-
 
   return (
     <>
@@ -77,15 +91,14 @@ function Register() {
                 name="role"
                 className="d-block text-center"
                 initialValue={false}
-                rules={[{ required: true, message: "Please select an option!" }]}
+                rules={[
+                  { required: true, message: "Please select an option!" },
+                ]}
               >
                 <div className="d-flex justify-content-start">
-                  <Radio.Group
-                    name="radiogroup"
-                    className="flex-start"
-                  >
-                    <Radio value={'partner'}>Yes</Radio>
-                    <Radio value={'user'}>No</Radio>
+                  <Radio.Group name="radiogroup" className="flex-start">
+                    <Radio value={"partner"}>Yes</Radio>
+                    <Radio value={"user"}>No</Radio>
                   </Radio.Group>
                 </div>
               </Form.Item>
