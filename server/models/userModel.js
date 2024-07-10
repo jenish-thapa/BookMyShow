@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { randomBytes, createHmac } = require("crypto");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema(
   {
@@ -35,19 +35,37 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", function (next) {
+userSchema.pre("save", async function (next) {
   const user = this;
 
-  if (!user.isModified("password")) return;
+  if (!user.isModified("password")) return next();
 
-  const salt = randomBytes(16);
-  const hashedPass = createHmac("sha256", salt)
-    .update(user.password)
-    .digest("hex");
-  this.salt = salt;
-  this.password = hashedPass;
-  next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    console.log(salt);
+    const salt2 = await bcrypt.genSalt(10);
+    console.log(salt2);
+    user.password = await bcrypt.hash(user.password, salt);
+    const p = await bcrypt.hash(user.password, salt2);
+    console.log(user.password);
+    console.log(p);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
+
+userSchema.statics.matchPassword = async function (email, password) {
+  const user = await this.findOne({ email });
+  if (!user) {
+    return { error: "User not found" };
+  }
+  const validatePassword = await bcrypt.compare(password, user.password);
+  if (!validatePassword) {
+    return { error: "Invalid password" };
+  }
+  return { message: "User logged in" };
+};
 
 const User = mongoose.model("User", userSchema);
 
