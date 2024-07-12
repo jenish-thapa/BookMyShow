@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
@@ -12,7 +13,10 @@ router.post("/register", async (req, res) => {
     } else {
       const newUser = new User(req.body);
       await newUser.save();
-      res.status(201).json("User created");
+      res.send({
+        success: true,
+        message: "User created successfully!!",
+      });
     }
   } catch (error) {
     res.json(error);
@@ -20,12 +24,16 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
   const result = await User.matchPassword(email, password);
   if (result.error) {
-    return res.status(400).json(result);
+    return res.send({ success: false, error: "Incorrect password or email" });
   }
-  res.send(result);
+  const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+  res.send({ success: true, message: "User loggedin", token: token });
+  
 });
 
 module.exports = router;

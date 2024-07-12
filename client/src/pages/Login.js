@@ -1,29 +1,24 @@
 import React, { useEffect } from "react";
 import { Button, Form, Input } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import { message } from "antd";
+import { LoginUser } from "../calls/users";
 
 function Login() {
   const onFinish = async (values) => {
     console.log(values);
     try {
-      const response = await fetch("http://localhost:8081/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Success:", data);
+      const response = await LoginUser(values);
+      if (response.success) {
+        message.success(response.message);
+        localStorage.setItem("token", response.token);
+        Navigate("/");
       } else {
-        console.error("Error:", response.statusText);
+        message.error(response.error);
       }
     } catch (error) {
-      console.error("Error:", error);
+      message.success(error.message);
     }
   };
 

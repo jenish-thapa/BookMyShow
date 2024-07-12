@@ -1,27 +1,20 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, Radio, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { RegisterUser } from "../calls/users";
 
 function Register() {
   const onFinish = async (values) => {
     console.log(values);
     try {
-      const response = await fetch("http://localhost:8081/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Success:", data);
+      const response = await RegisterUser(values);
+      if (response.success) {
+        message.success(response.message);
       } else {
-        console.error("Error:", response.statusText);
+        message.error(response.message);
       }
     } catch (error) {
-      console.error("Error:", error);
+      message.error(error.message);
     }
   };
 
