@@ -4,6 +4,7 @@ const Movie = require("../models/movieModel");
 // Add a Movi
 
 router.post("/add-movie", async (req, res) => {
+  console.log("hit");
   try {
     const newMovie = new Movie(req.body);
     await newMovie.save();
